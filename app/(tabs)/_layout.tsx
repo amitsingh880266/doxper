@@ -28,7 +28,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="ChartsScreen"
         options={{
           title: "Explore",
         }}
