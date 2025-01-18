@@ -31,7 +31,68 @@ export interface Expense {
   creationDate: string;
 }
 
+interface MonthlyExpense {
+  [key: string]: {
+    food: number;
+    entertainment: number;
+    travel: number;
+    other: number;
+  };
+}
+
 const TableView = ({ expenses }: { expenses: Expense[] }) => {
+  let uniqueMonths = new Set(
+    expenses.map((it) => it.creationDate.split("T")[0].slice(0, 7))
+  );
+  let months = Array.from(uniqueMonths) as string[];
+
+  const getExpenseByMonth = (month: string): MonthlyExpense => {
+    let monthlyExpense = expenses.filter(
+      (ex) => ex.creationDate.split("T")[0].slice(0, 7) == month
+    );
+    let foodExpense = 0;
+    monthlyExpense
+      .filter((it) => it.category == "Food")
+      .forEach((ex) => {
+        foodExpense += ex.amount;
+      });
+
+    let traveExpense = 0;
+    monthlyExpense
+      .filter((it) => it.category == "Travel")
+      .forEach((ex) => {
+        traveExpense += ex.amount;
+      });
+
+    let entertainment = 0;
+    monthlyExpense
+      .filter((it) => it.category == "Entertainment")
+      .forEach((ex) => {
+        entertainment += ex.amount;
+      });
+
+    let otherExpense = 0;
+    monthlyExpense
+      .filter((it) => it.category == "Other")
+      .forEach((ex) => {
+        otherExpense += ex.amount;
+      });
+    let row: MonthlyExpense = {
+      [month]: {
+        food: foodExpense,
+        travel: traveExpense,
+        entertainment: entertainment,
+        other: otherExpense,
+      },
+    };
+    return row;
+  };
+
+  const expenseInEveryMonth: MonthlyExpense[] = months.map((it) =>
+    getExpenseByMonth(it)
+  );
+  console.log("desired data ::", expenseInEveryMonth);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Text style={styles.heading}>Expense List</Text>
@@ -52,6 +113,33 @@ const TableView = ({ expenses }: { expenses: Expense[] }) => {
             <Text style={styles.headerCell}>Category</Text>
             <Text style={styles.headerCell}>Amount</Text>
             <Text style={styles.headerCell}>Date</Text>
+          </View>
+        )}
+      />
+      <FlatList
+        data={expenseInEveryMonth}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => {
+          const key = Object.keys(item)[0];
+          const value = Object.values(item)[0];
+
+          return (
+            <View style={styles.row}>
+              <Text style={styles.cell}>{`${key}`}</Text>
+              <Text style={styles.cell}>{`${value.food}`}</Text>
+              <Text style={styles.cell}>{`${value.entertainment}`}</Text>
+              <Text style={styles.cell}>{`${value.travel}`}</Text>
+              <Text style={styles.cell}>{`${value.other}`}</Text>
+            </View>
+          );
+        }}
+        ListHeaderComponent={() => (
+          <View style={[styles.row, styles.header]}>
+            <Text style={styles.headerCell}>Month</Text>
+            <Text style={styles.headerCell}>Food</Text>
+            <Text style={styles.headerCell}>Entertainment</Text>
+            <Text style={styles.headerCell}>Travel</Text>
+            <Text style={styles.headerCell}>Other</Text>
           </View>
         )}
       />
